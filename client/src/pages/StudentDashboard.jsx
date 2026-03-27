@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getStudentDashboard } from "../api/api";
+import { getStudentDashboard, getStudentAttendance } from "../api/api";
 import Sidebar from "../components/Sidebar";
 import StreakTracker from "../components/StreakTracker";
 
@@ -13,8 +13,18 @@ export default function StudentDashboard() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    getStudentDashboard(user.id)
-      .then(setData)
+    setError("");
+    Promise.all([
+      getStudentDashboard(user.id),
+      getStudentAttendance(user.id)
+    ])
+      .then(([dashData, attData]) => {
+        setData({
+          ...dashData,
+          attendance: attData.overall_percentage,
+          subjects: attData.subjects,
+        });
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [user]);
@@ -86,10 +96,10 @@ export default function StudentDashboard() {
         {/* Middle Row: Streak + Subject Breakdown */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
           <div className="lg:col-span-1">
-            <StreakTracker subjects={getSubjectsFromData(data)} />
+            <StreakTracker subjects={data.subjects || []} />
           </div>
           <div className="lg:col-span-2">
-            <SubjectBreakdown data={data} />
+            <SubjectBreakdown subjects={data.subjects || []} />
           </div>
         </div>
 
@@ -103,12 +113,7 @@ export default function StudentDashboard() {
   );
 }
 
-// ── Helper: Extract subject data for streak tracker ──
-function getSubjectsFromData(data) {
-  // Dashboard doesn't include per-subject data directly,
-  // but we can infer from attendance %
-  return [{ percentage: data.attendance }];
-}
+
 
 // ── Stat Card ──
 function StatCard({ label, value, sub, color, icon }) {
@@ -134,40 +139,38 @@ function StatCard({ label, value, sub, color, icon }) {
 }
 
 // ── Subject Breakdown (from attendance data in dashboard) ──
-function SubjectBreakdown({ data }) {
+function SubjectBreakdown({ subjects }) {
   return (
-    <div className="glass-card p-6 fade-in h-full">
+    <div className="glass-card p-6 fade-in h-full flex flex-col">
       <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-        Attendance Overview
+        Subject Breakdown
       </h3>
-      <div className="flex items-center justify-center h-[calc(100%-2rem)]">
-        <div className="text-center">
-          <div className="relative w-32 h-32 mx-auto mb-4">
-            <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(99,102,241,0.1)" strokeWidth="10" />
-              <circle
-                cx="60" cy="60" r="52"
-                fill="none"
-                stroke={data.attendance >= 75 ? "#34d399" : "#f87171"}
-                strokeWidth="10"
-                strokeLinecap="round"
-                strokeDasharray={`${(data.attendance / 100) * 326.7} 326.7`}
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold">{data.attendance}%</span>
+      {subjects.length === 0 ? (
+        <p className="text-text-muted text-sm mt-4">No subjects data available</p>
+      ) : (
+        <div className="space-y-5 overflow-y-auto pr-2 max-h-64 flex-1">
+          {subjects.map((sub) => (
+            <div key={sub.subject_id} className="fade-in">
+              <div className="flex items-center justify-between text-sm mb-1.5 font-medium">
+                <span className="truncate pr-4">{sub.subject_name}</span>
+                <span className={`shrink-0 ${sub.percentage >= 75 ? "text-accent-green" : "text-accent-red"}`}>
+                  {sub.percentage}%
+                </span>
+              </div>
+              <div className="w-full bg-dark-600 rounded-full h-2 mb-1.5 overflow-hidden flex">
+                <div
+                  className={`h-full rounded-full transition-all duration-1000 ease-out ${sub.percentage >= 75 ? "bg-accent-green" : "bg-accent-red"}`}
+                  style={{ width: `${Math.min(100, sub.percentage)}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-[11px] text-text-muted">
+                <span>Attended: {sub.attended}/{sub.total}</span>
+                <span>Safe to bunk: {sub.safe_to_bunk}</span>
+              </div>
             </div>
-          </div>
-          <p className="text-sm text-text-secondary">Overall Attendance</p>
-          <p className="text-xs text-text-muted mt-1">
-            {data.attendance >= 75
-              ? `✅ You can safely miss ${data.safe_to_bunk} more classes`
-              : "⚠️ Attendance below 75% threshold"
-            }
-          </p>
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }

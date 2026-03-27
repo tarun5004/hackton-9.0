@@ -16,11 +16,16 @@ export default function TeacherDashboard() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("students");
 
-  useEffect(() => {
+  const fetchStudents = () => {
+    setLoading(true);
     getAllStudents()
       .then(setStudents)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchStudents();
   }, []);
 
   const tabs = [
@@ -70,10 +75,10 @@ export default function TeacherDashboard() {
         {/* Tab Content */}
         <div className="fade-in">
           {activeTab === "students" && <StudentsTable students={students} loading={loading} />}
-          {activeTab === "attendance" && <BulkAttendanceForm students={students} />}
-          {activeTab === "csv" && <CSVUploadForm />}
-          {activeTab === "assignment" && <AssignmentForm />}
-          {activeTab === "labsheet" && <LabSheetForm />}
+          {activeTab === "attendance" && <BulkAttendanceForm students={students} onSuccess={fetchStudents} />}
+          {activeTab === "csv" && <CSVUploadForm onSuccess={fetchStudents} />}
+          {activeTab === "assignment" && <AssignmentForm onSuccess={fetchStudents} />}
+          {activeTab === "labsheet" && <LabSheetForm onSuccess={fetchStudents} />}
         </div>
       </main>
     </div>
@@ -128,7 +133,7 @@ function StudentsTable({ students, loading }) {
 }
 
 // ── Bulk Attendance Form ──
-function BulkAttendanceForm({ students }) {
+function BulkAttendanceForm({ students, onSuccess }) {
   const [subjectId, setSubjectId] = useState("");
   const [records, setRecords] = useState([]);
   const [result, setResult] = useState(null);
@@ -164,6 +169,7 @@ function BulkAttendanceForm({ students }) {
       setResult(res);
       setSubjectId("");
       setRecords(students.map((s) => ({ student_id: s.id, name: s.name, attended: 0, total: 0 })));
+      if (onSuccess) onSuccess();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -242,7 +248,7 @@ function BulkAttendanceForm({ students }) {
 }
 
 // ── CSV Upload ──
-function CSVUploadForm() {
+function CSVUploadForm({ onSuccess }) {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -261,6 +267,7 @@ function CSVUploadForm() {
       const res = await uploadCSV(file);
       setResult(res);
       setFile(null);
+      if (onSuccess) onSuccess();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -341,7 +348,7 @@ function CSVUploadForm() {
 }
 
 // ── Assignment Form ──
-function AssignmentForm() {
+function AssignmentForm({ onSuccess }) {
   const [form, setForm] = useState({ subject_id: "", title: "", deadline: "" });
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -363,6 +370,7 @@ function AssignmentForm() {
       });
       setResult(res);
       setForm({ subject_id: "", title: "", deadline: "" });
+      if (onSuccess) onSuccess();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -420,7 +428,7 @@ function AssignmentForm() {
 }
 
 // ── Lab Sheet Form ──
-function LabSheetForm() {
+function LabSheetForm({ onSuccess }) {
   const [form, setForm] = useState({ subject_id: "", title: "", deadline: "" });
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -442,6 +450,7 @@ function LabSheetForm() {
       });
       setResult(res);
       setForm({ subject_id: "", title: "", deadline: "" });
+      if (onSuccess) onSuccess();
     } catch (err) {
       setError(err.message);
     } finally {
