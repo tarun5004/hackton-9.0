@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getStudentDashboard, getStudentAttendance } from "../api/api";
 import Sidebar from "../components/Sidebar";
@@ -177,7 +177,9 @@ function SubjectBreakdown({ subjects }) {
 
 // ── Assignments List ──
 function AssignmentsList({ assignments }) {
-  const sorted = [...assignments].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+  const sorted = useMemo(() => {
+    return [...assignments].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+  }, [assignments]);
 
   return (
     <div className="glass-card p-6">
@@ -227,7 +229,9 @@ function AssignmentsList({ assignments }) {
 
 // ── Lab Sheets List ──
 function LabSheetsList({ labsheets }) {
-  const sorted = [...labsheets].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+  const sorted = useMemo(() => {
+    return [...labsheets].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+  }, [labsheets]);
 
   return (
     <div className="glass-card p-6">
