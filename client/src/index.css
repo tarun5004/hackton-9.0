@@ -21,54 +21,52 @@
 /* ── Base Styles ── */
 @layer base {
   :root {
-    /* GOOGLE CLASSROOM INSPIRED – SOFT PASTEL MODE */
-    --th-bg-main: #F0F4F8;
+    /* LIGHT MODE */
+    --th-bg-main: #F0F9F8;
     --th-bg-card: #FFFFFF;
-    --th-bg-card-hover: #F7FAFC;
-    --th-border: #E2E8F0;
-    --th-border-highlight: #CBD5E0;
+    --th-bg-card-hover: #F8FBFB;
+    --th-border: #C6E6E3;
+    --th-border-highlight: #A3D8D2;
     
-    --th-accent-primary: #4285F4; /* Google Blue */
-    --th-accent-secondary: #7C4DFF; /* Deep Purple */
+    --th-accent-primary: #81C8B2;
+    --th-accent-secondary: #FFD3DD;
     --th-accent-cyan: #00BCD4;
-    --th-accent-green: #0F9D58; /* Google Green */
-    --th-accent-red: #DB4437; /* Google Red */
-    --th-accent-amber: #F4B400; /* Google Yellow */
+    --th-accent-green: #34A853; 
+    --th-accent-red: #EA4335; 
+    --th-accent-amber: #FBBC05; 
     
-    --th-text-main: #202124; /* Google Dark */
-    --th-text-sec: #5F6368; /* Google Grey */
-    --th-text-muted: #9AA0A6;
+    --th-text-main: #1F2937;
+    --th-text-sec: #4B5563;
+    --th-text-muted: #9CA3AF;
     
-    --th-shadow: 0 1px 3px rgba(60, 64, 67, 0.08), 0 4px 8px rgba(60, 64, 67, 0.06);
-    --th-shadow-hover: 0 2px 8px rgba(60, 64, 67, 0.12), 0 6px 16px rgba(60, 64, 67, 0.08);
-    --th-btn-grad: linear-gradient(135deg, #4285F4, #5B9EF5);
-    --th-btn-border: transparent;
+    --th-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.02);
+    --th-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.03);
+    --th-btn-grad: linear-gradient(135deg, #81C8B2, #6FBAA3);
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      /* DARK MODE – GOOGLE MATERIAL DARK */
-      --th-bg-main: #121212;
-      --th-bg-card: #1E1E1E;
-      --th-bg-card-hover: #2A2A2A;
-      --th-border: #333333;
-      --th-border-highlight: #444444;
+      /* DARK MODE */
+      --th-bg-main: #0f172a;
+      --th-bg-card: #1e293b;
+      --th-bg-card-hover: #334155;
+      --th-border: #334155;
+      --th-border-highlight: #475569;
       
-      --th-accent-primary: #8AB4F8; /* Light Google Blue */
-      --th-accent-secondary: #B388FF;
-      --th-accent-cyan: #4DD0E1;
-      --th-accent-green: #81C995;
-      --th-accent-red: #F28B82;
-      --th-accent-amber: #FDD663;
+      --th-accent-primary: #81C8B2; 
+      --th-accent-secondary: #FFD3DD;
+      --th-accent-cyan: #67E8F9;
+      --th-accent-green: #86EFAC;
+      --th-accent-red: #FCA5A5;
+      --th-accent-amber: #FDE047;
       
-      --th-text-main: #E8EAED;
-      --th-text-sec: #9AA0A6;
-      --th-text-muted: #6B7280;
+      --th-text-main: #F8FAFC;
+      --th-text-sec: #CBD5E1;
+      --th-text-muted: #94A3B8;
       
-      --th-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-      --th-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.35);
-      --th-btn-grad: linear-gradient(135deg, #8AB4F8, #AECBFA);
-      --th-btn-border: transparent;
+      --th-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --th-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --th-btn-grad: linear-gradient(135deg, #81C8B2, #6FBAA3);
     }
   }
 
@@ -131,16 +129,15 @@
     border: none;
     cursor: pointer;
     font-size: 0.9rem;
-    box-shadow: 0 1px 3px rgba(66, 133, 244, 0.3);
   }
   @media (prefers-color-scheme: dark) {
     .btn-primary {
-      color: #202124;
+      color: #0F172A;
     }
   }
   .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(66, 133, 244, 0.4);
+    opacity: 0.9;
   }
   .btn-primary:active {
     transform: translateY(0);
@@ -149,7 +146,6 @@
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
   }
 
   .input-field {
@@ -166,7 +162,7 @@
   .input-field:focus {
     border-color: var(--color-accent-blue);
     background: var(--color-dark-800);
-    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+    box-shadow: 0 0 0 3px rgba(129, 200, 178, 0.2);
   }
   .input-field::placeholder {
     color: var(--color-text-muted);

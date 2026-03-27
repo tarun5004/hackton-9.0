@@ -37,7 +37,7 @@ export default function Login() {
       <div className="w-full max-w-md fade-in relative">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold gradient-text mb-2">EduDash</h1>
+          <h1 className="text-4xl font-bold gradient-text mb-2">Catalyst</h1>
           <p className="text-text-muted text-sm">College Productivity Dashboard</p>
         </div>
 
