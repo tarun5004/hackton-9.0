@@ -1,0 +1,101 @@
+email,subject_name,attended,total
+21mca001@mca.edu,Python,0,35
+21mca001@mca.edu,DBMS,35,35
+21mca001@mca.edu,Data Structures,33,35
+21mca001@mca.edu,Web Development,34,35
+21mca002@mca.edu,Python,38,38
+21mca002@mca.edu,DBMS,36,36
+21mca002@mca.edu,Data Structures,40,40
+21mca002@mca.edu,Web Development,34,34
+21mca003@mca.edu,Python,15,35
+21mca003@mca.edu,DBMS,18,38
+21mca003@mca.edu,Data Structures,14,32
+21mca003@mca.edu,Web Development,20,36
+21mca004@mca.edu,Python,27,36
+21mca004@mca.edu,DBMS,28,37
+21mca004@mca.edu,Data Structures,26,35
+21mca004@mca.edu,Web Development,27,36
+21mca005@mca.edu,Python,34,36
+21mca005@mca.edu,DBMS,35,37
+21mca005@mca.edu,Data Structures,33,35
+21mca005@mca.edu,Web Development,38,40
+21mca006@mca.edu,Python,33,35
+21mca006@mca.edu,DBMS,36,38
+21mca006@mca.edu,Data Structures,31,33
+21mca006@mca.edu,Web Development,36,38
+21mca007@mca.edu,Python,35,37
+21mca007@mca.edu,DBMS,34,36
+21mca007@mca.edu,Data Structures,39,40
+21mca007@mca.edu,Web Development,32,34
+21mca008@mca.edu,Python,17,35
+21mca008@mca.edu,DBMS,19,36
+21mca008@mca.edu,Data Structures,30,34
+21mca008@mca.edu,Web Development,33,38
+21mca009@mca.edu,Python,16,34
+21mca009@mca.edu,DBMS,18,37
+21mca009@mca.edu,Data Structures,29,33
+21mca009@mca.edu,Web Development,31,35
+21mca010@mca.edu,Python,18,36
+21mca010@mca.edu,DBMS,20,38
+21mca010@mca.edu,Data Structures,32,35
+21mca010@mca.edu,Web Development,34,37
+21mca011@mca.edu,Python,28,35
+21mca011@mca.edu,DBMS,30,36
+21mca011@mca.edu,Data Structures,25,33
+21mca011@mca.edu,Web Development,29,35
+21mca012@mca.edu,Python,32,36
+21mca012@mca.edu,DBMS,33,37
+21mca012@mca.edu,Data Structures,30,34
+21mca012@mca.edu,Web Development,35,38
+21mca013@mca.edu,Python,25,34
+21mca013@mca.edu,DBMS,27,36
+21mca013@mca.edu,Data Structures,28,35
+21mca013@mca.edu,Web Development,26,34
+21mca014@mca.edu,Python,30,35
+21mca014@mca.edu,DBMS,32,37
+21mca014@mca.edu,Data Structures,31,36
+21mca014@mca.edu,Web Development,33,38
+21mca015@mca.edu,Python,22,35
+21mca015@mca.edu,DBMS,24,36
+21mca015@mca.edu,Data Structures,21,33
+21mca015@mca.edu,Web Development,23,35
+21mca016@mca.edu,Python,29,34
+21mca016@mca.edu,DBMS,31,37
+21mca016@mca.edu,Data Structures,27,33
+21mca016@mca.edu,Web Development,30,36
+21mca017@mca.edu,Python,26,35
+21mca017@mca.edu,DBMS,28,36
+21mca017@mca.edu,Data Structures,30,38
+21mca017@mca.edu,Web Development,27,35
+21mca018@mca.edu,Python,33,36
+21mca018@mca.edu,DBMS,35,38
+21mca018@mca.edu,Data Structures,32,35
+21mca018@mca.edu,Web Development,36,39
+21mca019@mca.edu,Python,20,35
+21mca019@mca.edu,DBMS,22,36
+21mca019@mca.edu,Data Structures,19,33
+21mca019@mca.edu,Web Development,21,35
+21mca020@mca.edu,Python,31,35
+21mca020@mca.edu,DBMS,33,37
+21mca020@mca.edu,Data Structures,29,34
+21mca020@mca.edu,Web Development,32,36
+21mca021@mca.edu,Python,24,35
+21mca021@mca.edu,DBMS,26,37
+21mca021@mca.edu,Data Structures,23,33
+21mca021@mca.edu,Web Development,25,35
+21mca022@mca.edu,Python,34,36
+21mca022@mca.edu,DBMS,35,37
+21mca022@mca.edu,Data Structures,33,35
+21mca022@mca.edu,Web Development,36,38
+21mca023@mca.edu,Python,27,35
+21mca023@mca.edu,DBMS,29,37
+21mca023@mca.edu,Data Structures,26,34
+21mca023@mca.edu,Web Development,28,36
+21mca024@mca.edu,Python,30,34
+21mca024@mca.edu,DBMS,32,36
+21mca024@mca.edu,Data Structures,29,33
+21mca024@mca.edu,Web Development,31,35
+21mca025@mca.edu,Python,23,35
+21mca025@mca.edu,DBMS,25,37
+21mca025@mca.edu,Data Structures,22,34
+21mca025@mca.edu,Web Development,24,36

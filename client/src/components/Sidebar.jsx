@@ -4,7 +4,7 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
 
   return (
-    <aside className="w-64 min-h-screen bg-dark-800 border-r border-dark-600 flex flex-col p-6 fixed left-0 top-0">
+    <aside className="w-64 min-h-screen bg-dark-800 border-r border-dark-600 flex flex-col p-6 fixed left-0 top-0" id="sidebar">
       {/* Logo */}
       <div className="mb-10">
         <h1 className="text-xl font-bold gradient-text">EduDash</h1>
@@ -18,8 +18,8 @@ export default function Sidebar() {
             {user?.name?.charAt(0) || "?"}
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-semibold truncate">{user?.name}</p>
-            <p className="text-xs text-text-muted capitalize">{user?.role}</p>
+            <p className="text-sm font-semibold truncate">{user?.name || "User"}</p>
+            <p className="text-xs text-text-muted capitalize">{user?.role || "unknown"}</p>
           </div>
         </div>
       </div>
@@ -47,6 +47,7 @@ export default function Sidebar() {
       <button
         onClick={logout}
         className="flex items-center gap-3 px-4 py-3 rounded-xl text-accent-red hover:bg-dark-700 transition-all duration-200 text-sm font-medium mt-4 cursor-pointer"
+        id="logout-btn"
       >
         <span>🚪</span>
         <span>Log Out</span>

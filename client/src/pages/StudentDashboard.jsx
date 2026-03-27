@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getStudentDashboard, getStudentAttendance } from "../api/api";
+import { getStudentDashboard } from "../api/api";
 import Sidebar from "../components/Sidebar";
 import StreakTracker from "../components/StreakTracker";
 
@@ -10,31 +10,28 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const fetchDashboard = useCallback(() => {
     if (!user) return;
     setLoading(true);
     setError("");
-    Promise.all([
-      getStudentDashboard(user.id),
-      getStudentAttendance(user.id)
-    ])
-      .then(([dashData, attData]) => {
-        setData({
-          ...dashData,
-          attendance: attData.overall_percentage,
-          subjects: attData.subjects,
-        });
+    getStudentDashboard(user.id)
+      .then((dashData) => {
+        setData(dashData);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [user]);
 
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
+
   if (loading) return <LoadingScreen />;
-  if (error) return <ErrorScreen message={error} />;
+  if (error) return <ErrorScreen message={error} onRetry={fetchDashboard} />;
   if (!data) return null;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen" id="student-dashboard">
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
         {/* Header */}
@@ -46,7 +43,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Alerts */}
-        {data.alerts.length > 0 ? (
+        {data.alerts && data.alerts.length > 0 ? (
           <div className="mb-6 space-y-2 fade-in">
             {data.alerts.map((alert, i) => (
               <div
@@ -73,20 +70,20 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 stagger">
           <StatCard
             label="Overall Attendance"
-            value={`${data.attendance}%`}
-            color={data.attendance >= 75 ? "green" : "red"}
+            value={`${data.attendance ?? 0}%`}
+            color={(data.attendance ?? 0) >= 75 ? "green" : "red"}
             icon="📊"
           />
           <StatCard
             label="Safe to Bunk"
-            value={data.safe_to_bunk}
+            value={data.safe_to_bunk ?? 0}
             sub="classes remaining"
-            color={data.safe_to_bunk > 0 ? "cyan" : "red"}
+            color={(data.safe_to_bunk ?? 0) > 0 ? "cyan" : "red"}
             icon="🎯"
           />
           <StatCard
             label="Upcoming Deadlines"
-            value={data.alerts.filter((a) => a.type === "deadline").length}
+            value={(data.alerts || []).filter((a) => a.type === "deadline").length}
             sub="due within 3 days"
             color="amber"
             icon="📅"
@@ -105,8 +102,8 @@ export default function StudentDashboard() {
 
         {/* Bottom Row: Assignments + Lab Sheets */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 stagger">
-          <AssignmentsList assignments={data.assignments} />
-          <LabSheetsList labsheets={data.labsheets} />
+          <AssignmentsList assignments={data.assignments || []} />
+          <LabSheetsList labsheets={data.labsheets || []} />
         </div>
       </main>
     </div>
@@ -138,14 +135,14 @@ function StatCard({ label, value, sub, color, icon }) {
   );
 }
 
-// ── Subject Breakdown (from attendance data in dashboard) ──
+// ── Subject Breakdown ──
 function SubjectBreakdown({ subjects }) {
   return (
     <div className="glass-card p-6 fade-in h-full flex flex-col">
       <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
         Subject Breakdown
       </h3>
-      {subjects.length === 0 ? (
+      {(!subjects || subjects.length === 0) ? (
         <p className="text-text-muted text-sm mt-4">No subjects data available</p>
       ) : (
         <div className="space-y-5 overflow-y-auto pr-2 max-h-64 flex-1">
@@ -178,13 +175,14 @@ function SubjectBreakdown({ subjects }) {
 // ── Assignments List ──
 function AssignmentsList({ assignments }) {
   const sorted = useMemo(() => {
+    if (!assignments) return [];
     return [...assignments].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
   }, [assignments]);
 
   return (
     <div className="glass-card p-6">
       <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-        📝 Assignments ({assignments.length})
+        📝 Assignments ({assignments ? assignments.length : 0})
       </h3>
       {sorted.length === 0 ? (
         <p className="text-text-muted text-sm">No assignments yet</p>
@@ -230,13 +228,14 @@ function AssignmentsList({ assignments }) {
 // ── Lab Sheets List ──
 function LabSheetsList({ labsheets }) {
   const sorted = useMemo(() => {
+    if (!labsheets) return [];
     return [...labsheets].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
   }, [labsheets]);
 
   return (
     <div className="glass-card p-6">
       <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-        🔬 Lab Sheets ({labsheets.length})
+        🔬 Lab Sheets ({labsheets ? labsheets.length : 0})
       </h3>
       {sorted.length === 0 ? (
         <p className="text-text-muted text-sm">No lab sheets yet</p>
@@ -286,13 +285,18 @@ function LoadingScreen() {
 }
 
 // ── Error Screen ──
-function ErrorScreen({ message }) {
+function ErrorScreen({ message, onRetry }) {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="glass-card p-8 max-w-md text-center">
         <p className="text-4xl mb-4">😵</p>
         <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
-        <p className="text-text-muted text-sm">{message}</p>
+        <p className="text-text-muted text-sm mb-4">{message}</p>
+        {onRetry && (
+          <button onClick={onRetry} className="btn-primary">
+            Retry
+          </button>
+        )}
       </div>
     </div>
   );

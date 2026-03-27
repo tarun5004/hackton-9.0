@@ -36,6 +36,10 @@ export function getAllStudents() {
   return request("/teacher/students");
 }
 
+export function getAllSubjects() {
+  return request("/teacher/subjects");
+}
+
 export function bulkAttendance(data) {
   return request("/teacher/attendance/bulk", {
     method: "POST",

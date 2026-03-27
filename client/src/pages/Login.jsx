@@ -27,7 +27,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" id="login-page">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-accent-blue/5 blur-3xl" />
@@ -48,10 +48,11 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="text-sm text-text-secondary font-medium mb-2 block">
+              <label className="text-sm text-text-secondary font-medium mb-2 block" htmlFor="login-email">
                 Email Address
               </label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -63,7 +64,7 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="bg-accent-red/10 border border-accent-red/20 rounded-xl px-4 py-3 text-sm text-accent-red fade-in">
+              <div className="bg-accent-red/10 border border-accent-red/20 rounded-xl px-4 py-3 text-sm text-accent-red fade-in" id="login-error">
                 {error}
               </div>
             )}
@@ -72,6 +73,7 @@ export default function Login() {
               type="submit"
               disabled={loading}
               className="btn-primary w-full flex items-center justify-center gap-2"
+              id="login-submit-btn"
             >
               {loading ? (
                 <>
@@ -91,14 +93,16 @@ export default function Login() {
               <button
                 onClick={() => setEmail("21mca001@mca.edu")}
                 className="flex-1 text-xs py-2 px-3 rounded-lg bg-dark-700 text-text-secondary hover:bg-dark-600 hover:text-text-primary transition-all cursor-pointer"
+                id="demo-student-btn"
               >
-                👨‍🎓 Student
+                👨‍🎓 Aarav (Student)
               </button>
               <button
                 onClick={() => setEmail("sharma@mca.edu")}
                 className="flex-1 text-xs py-2 px-3 rounded-lg bg-dark-700 text-text-secondary hover:bg-dark-600 hover:text-text-primary transition-all cursor-pointer"
+                id="demo-teacher-btn"
               >
-                👩‍🏫 Teacher
+                👩‍🏫 Dr. Sharma
               </button>
             </div>
           </div>

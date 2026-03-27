@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   getAllStudents,
+  getAllSubjects,
   bulkAttendance,
   uploadCSV,
   createAssignment,
@@ -12,32 +13,37 @@ import Sidebar from "../components/Sidebar";
 export default function TeacherDashboard() {
   const { user } = useAuth();
   const [students, setStudents] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("students");
 
-  const fetchStudents = () => {
+  const fetchData = useCallback(() => {
     setLoading(true);
-    getAllStudents()
-      .then(setStudents)
+    setError("");
+    Promise.all([getAllStudents(), getAllSubjects()])
+      .then(([studentData, subjectData]) => {
+        setStudents(studentData || []);
+        setSubjects(subjectData || []);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchStudents();
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const tabs = [
-    { id: "students", label: "👥 Students", icon: "👥" },
-    { id: "attendance", label: "✅ Attendance", icon: "✅" },
-    { id: "csv", label: "📎 CSV Upload", icon: "📎" },
-    { id: "assignment", label: "📝 Assignment", icon: "📝" },
-    { id: "labsheet", label: "🔬 Lab Sheet", icon: "🔬" },
+    { id: "students", label: "👥 Students" },
+    { id: "attendance", label: "✅ Attendance" },
+    { id: "csv", label: "📎 CSV Upload" },
+    { id: "assignment", label: "📝 Assignment" },
+    { id: "labsheet", label: "🔬 Lab Sheet" },
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen" id="teacher-dashboard">
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
         {/* Header */}
@@ -75,10 +81,10 @@ export default function TeacherDashboard() {
         {/* Tab Content */}
         <div className="fade-in">
           {activeTab === "students" && <StudentsTable students={students} loading={loading} />}
-          {activeTab === "attendance" && <BulkAttendanceForm students={students} onSuccess={fetchStudents} />}
-          {activeTab === "csv" && <CSVUploadForm onSuccess={fetchStudents} />}
-          {activeTab === "assignment" && <AssignmentForm onSuccess={fetchStudents} />}
-          {activeTab === "labsheet" && <LabSheetForm onSuccess={fetchStudents} />}
+          {activeTab === "attendance" && <BulkAttendanceForm students={students} subjects={subjects} onSuccess={fetchData} />}
+          {activeTab === "csv" && <CSVUploadForm onSuccess={fetchData} />}
+          {activeTab === "assignment" && <AssignmentForm subjects={subjects} onSuccess={fetchData} />}
+          {activeTab === "labsheet" && <LabSheetForm subjects={subjects} onSuccess={fetchData} />}
         </div>
       </main>
     </div>
@@ -120,7 +126,7 @@ function StudentsTable({ students, loading }) {
                 <td className="px-5 py-3 text-sm text-text-secondary">{s.email}</td>
                 <td className="px-5 py-3">
                   <span className="text-xs px-2.5 py-1 rounded-full bg-accent-blue/10 text-accent-blue font-medium">
-                    {s.section}
+                    {s.section || "MCA"}
                   </span>
                 </td>
               </tr>
@@ -133,7 +139,7 @@ function StudentsTable({ students, loading }) {
 }
 
 // ── Bulk Attendance Form ──
-function BulkAttendanceForm({ students, onSuccess }) {
+function BulkAttendanceForm({ students, subjects, onSuccess }) {
   const [subjectId, setSubjectId] = useState("");
   const [records, setRecords] = useState([]);
   const [result, setResult] = useState(null);
@@ -142,7 +148,9 @@ function BulkAttendanceForm({ students, onSuccess }) {
 
   // Initialize records when students load
   useEffect(() => {
-    setRecords(students.map((s) => ({ student_id: s.id, name: s.name, attended: 0, total: 0 })));
+    if (students && students.length > 0) {
+      setRecords(students.map((s) => ({ student_id: s.id, name: s.name, attended: 0, total: 0 })));
+    }
   }, [students]);
 
   function updateRecord(studentId, field, value) {
@@ -156,10 +164,11 @@ function BulkAttendanceForm({ students, onSuccess }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!subjectId) {
-      setError("Enter subject ID");
+      setError("Please select a subject");
       return;
     }
     setError("");
+    setResult(null);
     setLoading(true);
     try {
       const res = await bulkAttendance({
@@ -185,14 +194,18 @@ function BulkAttendanceForm({ students, onSuccess }) {
 
       <form onSubmit={handleSubmit}>
         <div className="mb-5">
-          <label className="text-sm text-text-secondary font-medium mb-2 block">Subject ID</label>
-          <input
-            type="number"
+          <label className="text-sm text-text-secondary font-medium mb-2 block">Subject</label>
+          <select
             value={subjectId}
             onChange={(e) => setSubjectId(e.target.value)}
-            placeholder="e.g. 1"
             className="input-field max-w-xs"
-          />
+            id="attendance-subject-select"
+          >
+            <option value="">Select a subject...</option>
+            {(subjects || []).map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="overflow-x-auto mb-5">
@@ -239,7 +252,7 @@ function BulkAttendanceForm({ students, onSuccess }) {
           </p>
         )}
 
-        <button type="submit" disabled={loading} className="btn-primary">
+        <button type="submit" disabled={loading} className="btn-primary" id="submit-attendance-btn">
           {loading ? "Submitting..." : "Submit Attendance"}
         </button>
       </form>
@@ -262,11 +275,15 @@ function CSVUploadForm({ onSuccess }) {
       return;
     }
     setError("");
+    setResult(null);
     setLoading(true);
     try {
       const res = await uploadCSV(file);
       setResult(res);
       setFile(null);
+      // Reset the file input
+      const input = document.getElementById("csv-input");
+      if (input) input.value = "";
       if (onSuccess) onSuccess();
     } catch (err) {
       setError(err.message);
@@ -307,7 +324,7 @@ function CSVUploadForm({ onSuccess }) {
             id="csv-input"
             type="file"
             accept=".csv"
-            onChange={(e) => setFile(e.target.files[0])}
+            onChange={(e) => setFile(e.target.files[0] || null)}
             className="hidden"
           />
           <p className="text-3xl mb-3">📄</p>
@@ -326,7 +343,7 @@ function CSVUploadForm({ onSuccess }) {
         {result && (
           <div className="mb-4 fade-in">
             <p className="text-accent-green text-sm mb-2">✅ Imported {result.imported} records</p>
-            {result.errors.length > 0 && (
+            {result.errors && result.errors.length > 0 && (
               <div className="bg-accent-red/10 border border-accent-red/20 rounded-xl p-3 mt-2">
                 <p className="text-xs text-accent-red font-semibold mb-2">Errors:</p>
                 {result.errors.map((err, i) => (
@@ -339,7 +356,7 @@ function CSVUploadForm({ onSuccess }) {
           </div>
         )}
 
-        <button type="submit" disabled={loading || !file} className="btn-primary">
+        <button type="submit" disabled={loading || !file} className="btn-primary" id="upload-csv-btn">
           {loading ? "Uploading..." : "Upload CSV"}
         </button>
       </form>
@@ -348,7 +365,7 @@ function CSVUploadForm({ onSuccess }) {
 }
 
 // ── Assignment Form ──
-function AssignmentForm({ onSuccess }) {
+function AssignmentForm({ subjects, onSuccess }) {
   const [form, setForm] = useState({ subject_id: "", title: "", deadline: "" });
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -361,6 +378,7 @@ function AssignmentForm({ onSuccess }) {
       return;
     }
     setError("");
+    setResult(null);
     setLoading(true);
     try {
       const res = await createAssignment({
@@ -385,14 +403,18 @@ function AssignmentForm({ onSuccess }) {
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-sm text-text-secondary font-medium mb-1.5 block">Subject ID</label>
-          <input
-            type="number"
+          <label className="text-sm text-text-secondary font-medium mb-1.5 block">Subject</label>
+          <select
             value={form.subject_id}
             onChange={(e) => setForm({ ...form, subject_id: e.target.value })}
-            placeholder="e.g. 1"
             className="input-field"
-          />
+            id="assignment-subject-select"
+          >
+            <option value="">Select a subject...</option>
+            {(subjects || []).map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="text-sm text-text-secondary font-medium mb-1.5 block">Title</label>
@@ -402,6 +424,7 @@ function AssignmentForm({ onSuccess }) {
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="Assignment title"
             className="input-field"
+            id="assignment-title-input"
           />
         </div>
         <div>
@@ -411,15 +434,16 @@ function AssignmentForm({ onSuccess }) {
             value={form.deadline}
             onChange={(e) => setForm({ ...form, deadline: e.target.value })}
             className="input-field"
+            id="assignment-deadline-input"
           />
         </div>
 
         {error && <p className="text-accent-red text-sm">{error}</p>}
         {result && (
-          <p className="text-accent-green text-sm fade-in">✅ Created: {result.title}</p>
+          <p className="text-accent-green text-sm fade-in">✅ Created: {result.title} ({result.subject_name})</p>
         )}
 
-        <button type="submit" disabled={loading} className="btn-primary">
+        <button type="submit" disabled={loading} className="btn-primary" id="create-assignment-btn">
           {loading ? "Creating..." : "Create Assignment"}
         </button>
       </form>
@@ -428,7 +452,7 @@ function AssignmentForm({ onSuccess }) {
 }
 
 // ── Lab Sheet Form ──
-function LabSheetForm({ onSuccess }) {
+function LabSheetForm({ subjects, onSuccess }) {
   const [form, setForm] = useState({ subject_id: "", title: "", deadline: "" });
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -441,6 +465,7 @@ function LabSheetForm({ onSuccess }) {
       return;
     }
     setError("");
+    setResult(null);
     setLoading(true);
     try {
       const res = await createLabSheet({
@@ -465,14 +490,18 @@ function LabSheetForm({ onSuccess }) {
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-sm text-text-secondary font-medium mb-1.5 block">Subject ID</label>
-          <input
-            type="number"
+          <label className="text-sm text-text-secondary font-medium mb-1.5 block">Subject</label>
+          <select
             value={form.subject_id}
             onChange={(e) => setForm({ ...form, subject_id: e.target.value })}
-            placeholder="e.g. 1"
             className="input-field"
-          />
+            id="labsheet-subject-select"
+          >
+            <option value="">Select a subject...</option>
+            {(subjects || []).map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="text-sm text-text-secondary font-medium mb-1.5 block">Title</label>
@@ -482,6 +511,7 @@ function LabSheetForm({ onSuccess }) {
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="Lab sheet title"
             className="input-field"
+            id="labsheet-title-input"
           />
         </div>
         <div>
@@ -491,15 +521,16 @@ function LabSheetForm({ onSuccess }) {
             value={form.deadline}
             onChange={(e) => setForm({ ...form, deadline: e.target.value })}
             className="input-field"
+            id="labsheet-deadline-input"
           />
         </div>
 
         {error && <p className="text-accent-red text-sm">{error}</p>}
         {result && (
-          <p className="text-accent-green text-sm fade-in">✅ Created: {result.title}</p>
+          <p className="text-accent-green text-sm fade-in">✅ Created: {result.title} ({result.subject_name})</p>
         )}
 
-        <button type="submit" disabled={loading} className="btn-primary">
+        <button type="submit" disabled={loading} className="btn-primary" id="create-labsheet-btn">
           {loading ? "Creating..." : "Create Lab Sheet"}
         </button>
       </form>

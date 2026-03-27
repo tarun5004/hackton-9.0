@@ -28,11 +28,18 @@ def seed():
         db.add_all([t1, t2])
         db.flush()
 
-        # --- Students ---
+        # --- 25 Indian Students ---
+        student_names = [
+            "Aarav Patel", "Priya Sharma", "Rohan Mehta", "Sneha Reddy", "Vikram Singh",
+            "Ananya Iyer", "Karthik Nair", "Deepika Joshi", "Arjun Kumar", "Meera Gupta",
+            "Rahul Verma", "Pooja Desai", "Aditya Rao", "Kavya Menon", "Siddharth Chopra",
+            "Nisha Agarwal", "Amit Thakur", "Divya Pillai", "Harsh Pandey", "Riya Kapoor",
+            "Varun Malhotra", "Shreya Das", "Nikhil Saxena", "Tanya Bhatt", "Manish Yadav",
+        ]
         students = []
-        for i in range(1, 11):
+        for i, name in enumerate(student_names, start=1):
             s = User(
-                name=f"Student {i:02d}",
+                name=name,
                 email=f"21mca{i:03d}@mca.edu",
                 role="student",
                 section="MCA",
@@ -55,18 +62,38 @@ def seed():
         import random
         random.seed(42)
 
-        for student in students:
-            for i, subject in enumerate(subjects):
-                if student.id == 1 and i == 0:
-                    total = 35
-                    attended = 20
-                elif student.id == 1 and i == 1:
-                    total = 40
-                    attended = 40
+        for idx, student in enumerate(students):
+            for j, subject in enumerate(subjects):
+                total = random.randint(30, 40)
+
+                if idx == 0:
+                    # Student 1: 0 attendance in first subject, high elsewhere
+                    if j == 0:
+                        attended = 0
+                    else:
+                        attended = total
+                elif idx == 1:
+                    # Student 2: 100% attendance everywhere
+                    attended = total
+                elif idx == 2:
+                    # Student 3: very low attendance (<75%) in all
+                    attended = random.randint(int(total * 0.40), int(total * 0.65))
+                elif idx == 3:
+                    # Student 4: borderline attendance
+                    attended = int(total * 0.75)
+                elif idx in [4, 5, 6]:
+                    # Students 5-7: high attendance (>90%)
+                    attended = random.randint(int(total * 0.90), total)
+                elif idx in [7, 8, 9]:
+                    # Students 8-10: low attendance in specific subjects
+                    if j < 2:
+                        attended = random.randint(int(total * 0.45), int(total * 0.65))
+                    else:
+                        attended = random.randint(int(total * 0.80), total)
                 else:
-                    total = random.randint(25, 40)
-                    attended = random.randint(int(total * 0.6), total)
-                
+                    # Rest: mixed attendance
+                    attended = random.randint(int(total * 0.55), total)
+
                 db.add(Attendance(
                     student_id=student.id,
                     subject_id=subject.id,
@@ -97,8 +124,8 @@ def seed():
 
         db.commit()
         print("✅ Database seeded successfully!")
-        print(f"   → 2 teachers, 10 students, 4 subjects")
-        print(f"   → 40 attendance records, 6 assignments, 4 lab sheets")
+        print(f"   → 2 teachers, 25 students, 4 subjects")
+        print(f"   → 100 attendance records, 6 assignments, 4 lab sheets")
 
     except Exception as e:
         db.rollback()

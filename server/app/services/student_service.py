@@ -42,6 +42,7 @@ def get_student_attendance(student_id: int, db: Session):
 
     records = (
         db.query(Attendance)
+        .options(joinedload(Attendance.subject))
         .filter(Attendance.student_id == student_id)
         .all()
     )
@@ -55,7 +56,7 @@ def get_student_attendance(student_id: int, db: Session):
         stb = calc_safe_to_bunk(rec.attended, rec.total)
         subjects.append({
             "subject_id": rec.subject_id,
-            "subject_name": rec.subject.name,
+            "subject_name": rec.subject.name if rec.subject else "Unknown",
             "attended": rec.attended,
             "total": rec.total,
             "percentage": pct,
@@ -87,7 +88,7 @@ def get_student_dashboard(student_id: int, db: Session):
             "id": a.id,
             "title": a.title,
             "subject_name": a.subject.name if a.subject else "Unknown Subject",
-            "deadline": a.deadline,
+            "deadline": a.deadline.isoformat() if a.deadline else None,
         }
         for a in assignments_raw
     ]
@@ -99,7 +100,7 @@ def get_student_dashboard(student_id: int, db: Session):
             "id": ls.id,
             "title": ls.title,
             "subject_name": ls.subject.name if ls.subject else "Unknown Subject",
-            "deadline": ls.deadline,
+            "deadline": ls.deadline.isoformat() if ls.deadline else None,
         }
         for ls in labsheets_raw
     ]
@@ -120,7 +121,7 @@ def get_student_dashboard(student_id: int, db: Session):
     threshold = now + timedelta(days=3)
 
     for a in assignments_raw:
-        if now <= a.deadline <= threshold:
+        if a.deadline and now <= a.deadline <= threshold:
             days_left = (a.deadline - now).days
             alerts.append({
                 "type": "deadline",
@@ -128,7 +129,7 @@ def get_student_dashboard(student_id: int, db: Session):
             })
 
     for ls in labsheets_raw:
-        if now <= ls.deadline <= threshold:
+        if ls.deadline and now <= ls.deadline <= threshold:
             days_left = (ls.deadline - now).days
             alerts.append({
                 "type": "deadline",
@@ -138,6 +139,7 @@ def get_student_dashboard(student_id: int, db: Session):
     return {
         "attendance": overall_pct,
         "safe_to_bunk": overall_stb,
+        "subjects": att_data["subjects"],
         "assignments": assignments,
         "labsheets": labsheets,
         "alerts": alerts,

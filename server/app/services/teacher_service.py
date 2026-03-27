@@ -3,7 +3,7 @@ import io
 from typing import List
 
 from fastapi import HTTPException, UploadFile
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.user import User
 from app.models.subject import Subject
@@ -20,6 +20,15 @@ from app.schemas.teacher import AttendanceRecord
 def get_all_students(db: Session) -> List[User]:
     """Return all users with role='student'."""
     return db.query(User).filter(User.role == "student").all()
+
+
+# ---------------------------------------------------------------------------
+# Subjects
+# ---------------------------------------------------------------------------
+
+def get_all_subjects(db: Session) -> List[Subject]:
+    """Return all subjects."""
+    return db.query(Subject).all()
 
 
 # ---------------------------------------------------------------------------
@@ -135,7 +144,7 @@ async def upload_csv(file: UploadFile, db: Session) -> dict:
 # Assignments
 # ---------------------------------------------------------------------------
 
-def create_assignment(subject_id: int, title: str, deadline, db: Session) -> Assignment:
+def create_assignment(subject_id: int, title: str, deadline, db: Session) -> dict:
     """Create a new assignment."""
     subject = db.query(Subject).filter(Subject.id == subject_id).first()
     if not subject:
@@ -145,14 +154,19 @@ def create_assignment(subject_id: int, title: str, deadline, db: Session) -> Ass
     db.add(assignment)
     db.commit()
     db.refresh(assignment)
-    return assignment
+    return {
+        "id": assignment.id,
+        "title": assignment.title,
+        "subject_name": subject.name,
+        "deadline": assignment.deadline.isoformat() if assignment.deadline else None,
+    }
 
 
 # ---------------------------------------------------------------------------
 # Lab Sheets
 # ---------------------------------------------------------------------------
 
-def create_labsheet(subject_id: int, title: str, deadline, db: Session) -> LabSheet:
+def create_labsheet(subject_id: int, title: str, deadline, db: Session) -> dict:
     """Create a new lab sheet."""
     subject = db.query(Subject).filter(Subject.id == subject_id).first()
     if not subject:
@@ -162,4 +176,9 @@ def create_labsheet(subject_id: int, title: str, deadline, db: Session) -> LabSh
     db.add(lab_sheet)
     db.commit()
     db.refresh(lab_sheet)
-    return lab_sheet
+    return {
+        "id": lab_sheet.id,
+        "title": lab_sheet.title,
+        "subject_name": subject.name,
+        "deadline": lab_sheet.deadline.isoformat() if lab_sheet.deadline else None,
+    }

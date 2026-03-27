@@ -7,6 +7,7 @@ from app.schemas.teacher import (
     BulkAttendanceResponse,
     CSVUploadResponse,
     StudentOut,
+    SubjectOut,
     AssignmentCreate,
     AssignmentResponse,
     LabSheetCreate,
@@ -14,6 +15,7 @@ from app.schemas.teacher import (
 )
 from app.services.teacher_service import (
     get_all_students,
+    get_all_subjects,
     update_attendance_bulk,
     upload_csv,
     create_assignment,
@@ -27,6 +29,12 @@ router = APIRouter(prefix="/teacher", tags=["Teacher"])
 def students(db: Session = Depends(get_db)):
     """List all students in MCA section."""
     return get_all_students(db)
+
+
+@router.get("/subjects", response_model=list[SubjectOut])
+def subjects(db: Session = Depends(get_db)):
+    """List all subjects."""
+    return get_all_subjects(db)
 
 
 @router.post("/attendance/bulk", response_model=BulkAttendanceResponse)

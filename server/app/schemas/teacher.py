@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 
 # --- Attendance ---
@@ -41,6 +42,17 @@ class StudentOut(BaseModel):
         from_attributes = True
 
 
+# --- Subjects ---
+
+class SubjectOut(BaseModel):
+    id: int
+    name: str
+    section: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
 # --- Assignment ---
 
 class AssignmentCreate(BaseModel):
@@ -52,6 +64,8 @@ class AssignmentCreate(BaseModel):
 class AssignmentResponse(BaseModel):
     id: int
     title: str
+    subject_name: str
+    deadline: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -68,6 +82,8 @@ class LabSheetCreate(BaseModel):
 class LabSheetResponse(BaseModel):
     id: int
     title: str
+    subject_name: str
+    deadline: Optional[str] = None
 
     class Config:
         from_attributes = True
