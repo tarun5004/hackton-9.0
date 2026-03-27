@@ -56,9 +56,17 @@ def seed():
         random.seed(42)
 
         for student in students:
-            for subject in subjects:
-                total = random.randint(25, 40)
-                attended = random.randint(int(total * 0.6), total)
+            for i, subject in enumerate(subjects):
+                if student.id == 1 and i == 0:
+                    total = 35
+                    attended = 20
+                elif student.id == 1 and i == 1:
+                    total = 40
+                    attended = 40
+                else:
+                    total = random.randint(25, 40)
+                    attended = random.randint(int(total * 0.6), total)
+                
                 db.add(Attendance(
                     student_id=student.id,
                     subject_id=subject.id,

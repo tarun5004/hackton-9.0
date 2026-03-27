@@ -73,8 +73,11 @@ async def upload_csv(file: UploadFile, db: Session) -> dict:
     Expected CSV columns: email, subject_name, attended, total
     """
     content = await file.read()
-    text = content.decode("utf-8")
-    reader = csv.DictReader(io.StringIO(text))
+    try:
+        text = content.decode("utf-8")
+        reader = list(csv.DictReader(io.StringIO(text)))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid CSV file format")
 
     imported = 0
     errors = []
