@@ -11,16 +11,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 load_dotenv()
 
 # --- Import Base and ALL models (so autogenerate detects them) ---
-from app.db.base import Base
+from app.db.base import Base, DATABASE_URL
 from app.models import *  # noqa: F401, F403
 
 # --- Alembic Config ---
 config = context.config
 
-# Override sqlalchemy.url from environment variable
-database_url = os.getenv("DATABASE_URL")
-if database_url:
-    config.set_main_option("sqlalchemy.url", database_url)
+# Override sqlalchemy.url with the processed var from base.py
+if DATABASE_URL:
+    config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

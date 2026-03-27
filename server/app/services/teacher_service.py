@@ -57,6 +57,7 @@ def update_attendance_bulk(
                 attended=rec.attended,
                 total=rec.total,
             ))
+            db.flush()
         updated += 1
 
     db.commit()
@@ -123,6 +124,7 @@ async def upload_csv(file: UploadFile, db: Session) -> dict:
                 attended=attended,
                 total=total,
             ))
+            db.flush()
         imported += 1
 
     db.commit()

@@ -2,7 +2,7 @@ import math
 from datetime import datetime, timedelta
 
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.user import User
 from app.models.attendance import Attendance
@@ -81,24 +81,24 @@ def get_student_dashboard(student_id: int, db: Session):
     overall_stb = calc_safe_to_bunk(total_attended, total_classes)
 
     # Assignments — all assignments (student sees everything in their section)
-    assignments_raw = db.query(Assignment).all()
+    assignments_raw = db.query(Assignment).options(joinedload(Assignment.subject)).all()
     assignments = [
         {
             "id": a.id,
             "title": a.title,
-            "subject_name": a.subject.name,
+            "subject_name": a.subject.name if a.subject else "Unknown Subject",
             "deadline": a.deadline,
         }
         for a in assignments_raw
     ]
 
     # Lab sheets
-    labsheets_raw = db.query(LabSheet).all()
+    labsheets_raw = db.query(LabSheet).options(joinedload(LabSheet.subject)).all()
     labsheets = [
         {
             "id": ls.id,
             "title": ls.title,
-            "subject_name": ls.subject.name,
+            "subject_name": ls.subject.name if ls.subject else "Unknown Subject",
             "deadline": ls.deadline,
         }
         for ls in labsheets_raw
